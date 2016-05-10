@@ -1,4 +1,4 @@
-package generics
+package lru
 
 import (
 	"testing"
