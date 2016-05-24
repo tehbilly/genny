@@ -11,7 +11,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/cheekybits/genny/parse"
+	"github.com/dimchansky/genny/parse"
 )
 
 /*
