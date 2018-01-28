@@ -108,6 +108,13 @@ var tests = []struct {
 		expectedOut: `test/buildtags/buildtags_expected_nostrip.go`,
 		tag:         "",
 	},
+	{
+		filename:    "join.go",
+		in:          `test/interfaces/join.go`,
+		types:       []map[string]string{{"Stringer": "MyStr"}},
+		expectedOut: `test/interfaces/join_expected.go`,
+		tag:         "",
+	},
 }
 
 func TestParse(t *testing.T) {
