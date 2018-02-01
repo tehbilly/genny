@@ -55,6 +55,7 @@ func main() {
 		out     = flag.String("out", "", "file to save output to instead of stdout")
 		pkgName = flag.String("pkg", "", "package name for generated files")
 		genTag  = flag.String("tag", "", "build tag that is stripped from output")
+		useAst  = flag.Bool("ast", false, "use AST implementation")
 		imports Strings
 		prefix  = "https://github.com/metabition/gennylib/raw/master/"
 	)
@@ -125,7 +126,7 @@ func main() {
 		}
 		r.Body.Close()
 		br := bytes.NewReader(b)
-		err = gen(*in, *pkgName, br, typeSets, imports, outWriter, *genTag)
+		err = gen(*in, *pkgName, br, typeSets, imports, outWriter, *genTag, *useAst)
 	} else if len(*in) > 0 {
 		var file *os.File
 		file, err = os.Open(*in)
@@ -134,7 +135,7 @@ func main() {
 			return
 		}
 		defer file.Close()
-		err = gen(*in, *pkgName, file, typeSets, imports, outWriter, *genTag)
+		err = gen(*in, *pkgName, file, typeSets, imports, outWriter, *genTag, *useAst)
 	} else {
 		var source []byte
 		source, err = ioutil.ReadAll(os.Stdin)
@@ -143,7 +144,7 @@ func main() {
 			return
 		}
 		reader := bytes.NewReader(source)
-		err = gen("stdin", *pkgName, reader, typeSets, imports, outWriter, *genTag)
+		err = gen("stdin", *pkgName, reader, typeSets, imports, outWriter, *genTag, *useAst)
 	}
 
 	// do the work
@@ -173,12 +174,12 @@ Flags:`)
 }
 
 // gen performs the generic generation.
-func gen(filename, pkgName string, in io.ReadSeeker, typesets []map[string]string, imports []string, out io.Writer, tag string) error {
+func gen(filename, pkgName string, in io.ReadSeeker, typesets []map[string]string, imports []string, out io.Writer, tag string, useAst bool) error {
 
 	var output []byte
 	var err error
 
-	output, err = parse.Generics(filename, pkgName, in, typesets, imports, tag)
+	output, err = parse.Generics(filename, pkgName, in, typesets, imports, tag, useAst)
 	if err != nil {
 		return err
 	}

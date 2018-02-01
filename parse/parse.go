@@ -6,13 +6,16 @@ import (
 	"fmt"
 	"go/ast"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"io"
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 	"unicode"
 
+	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/imports"
 )
 
@@ -182,7 +185,7 @@ func generateSpecific(filename string, in io.ReadSeeker, typeSet map[string]stri
 
 // Generics parses the source file and generates the bytes replacing the
 // generic types for the keys map with the specific types (its value).
-func Generics(filename, pkgName string, in io.ReadSeeker, typeSets []map[string]string, importPaths []string, stripTag string) ([]byte, error) {
+func Generics(filename, pkgName string, in io.ReadSeeker, typeSets []map[string]string, importPaths []string, stripTag string, useAstImpl bool) ([]byte, error) {
 	localUnwantedLinePrefixes := [][]byte{}
 	for _, ulp := range unwantedLinePrefixes {
 		localUnwantedLinePrefixes = append(localUnwantedLinePrefixes, ulp)
@@ -199,7 +202,13 @@ func Generics(filename, pkgName string, in io.ReadSeeker, typeSets []map[string]
 	for _, typeSet := range typeSets {
 
 		// generate the specifics
-		parsed, err := generateSpecific(filename, in, typeSet)
+		var parsed []byte
+		var err error
+		if useAstImpl {
+			parsed, err = generateSpecificAst(filename, in, typeSet)
+		} else {
+			parsed, err = generateSpecific(filename, in, typeSet)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -368,4 +377,249 @@ func addImports(r io.Reader, importPaths []string) []byte {
 		fmt.Fprintln(&out, s)
 	}
 	return out.Bytes()
+}
+
+// ===== Start AST related implementation =====
+
+type replaceSpec struct {
+	genericType string
+	specificType string
+}
+
+func (rs replaceSpec) toType() string {
+	return typify(rs.specificType)
+}
+
+func (rs replaceSpec) toWord(uppercase bool) string {
+	return wordify(rs.specificType, uppercase)
+}
+
+func (rs replaceSpec) String() string {
+	return fmt.Sprintf("%s -> %s", rs.genericType, rs.specificType)
+}
+
+func deleteAllComments(file *ast.File, root ast.Node) {
+	ast.Inspect(root, func (n ast.Node) bool {
+		if comment, ok := n.(*ast.CommentGroup); ok {
+			deleteComment(file, comment)
+		}
+		return true
+	})
+}
+
+func deleteComment(file *ast.File, comment *ast.CommentGroup) {
+	for i, com := range file.Comments {
+		if com == comment {
+			file.Comments = append(file.Comments[:i], file.Comments[i+1:]...)
+			break
+		}
+	}
+}
+
+func transformText(re *regexp.Regexp, text string, spec replaceSpec) string {
+	return re.ReplaceAllStringFunc(text, func(match string) string {
+		return spec.toWord(unicode.IsUpper(rune(match[0])))
+	})
+}
+
+func transformType(re *regexp.Regexp, ident *ast.Ident, spec replaceSpec, log string) *ast.Ident {
+	if ident.Name != spec.genericType {
+		// If they are not identical, the type is something like genericQueue. Perform normal text
+		// transformation
+		return transformIdentifier(re, ident, spec, log)
+	}
+	output := *ident
+	output.Name = spec.toType()
+	return &output
+}
+
+func transformIdentifier(re *regexp.Regexp, ident *ast.Ident, spec replaceSpec, log string) *ast.Ident {
+	transformed := transformText(re, ident.Name, spec)
+
+	output := *ident
+	output.Name = transformed
+	return &output
+}
+
+func generateSpecificType(fs *token.FileSet, file *ast.File, spec replaceSpec) {
+	re := regexp.MustCompile("(?i)" + spec.genericType)
+
+	astutil.Apply(file,
+		func(c *astutil.Cursor) bool {
+			switch v := c.Node().(type) {
+			case *ast.Ident:
+				var newIdent *ast.Ident
+				if containsFold(v.Name, spec.genericType) {
+					switch p := c.Parent().(type) {
+					case *ast.ArrayType:
+						// []generic
+						// []genericValue
+						newIdent = transformType(re, v, spec, "ARRAY TYPE")
+					case *ast.ValueSpec:
+						if v == p.Type {
+							// var something generic
+							// var something genericValue
+							newIdent = transformType(re, v, spec, "VALUE TYPE")
+						} else {
+							// var generic string
+							// var genericVariable string
+							newIdent = transformIdentifier(re, v, spec, "VARNAME")
+						}
+					case *ast.CallExpr:
+						// myfunc(generic)
+						// myfunc(genericVariable)
+						newIdent = transformIdentifier(re, v, spec, "ARG VARNAME")
+					case *ast.TypeSpec:
+						if v == p.Name {
+							// type generic someType
+							// type genericValue someType
+							newIdent = transformIdentifier(re, v, spec, "TYPE NAME")
+						} else {
+							// type newType generic
+							// type newType genericSomething
+							newIdent = transformType(re, v, spec, "TYPE VALUE")
+						}
+					case *ast.Field:
+						if v == p.Type {
+							// func a(g generic) or func a(g genericValue)
+							newIdent = transformType(re, v, spec, "FIELD TYPE")
+						} else {
+							// func a(genericSomething someType)
+							newIdent = transformIdentifier(re, v, spec, "ARG DECL NAME")
+						}
+					case *ast.FuncDecl:
+						// func PrintGeneric()
+						newIdent = transformIdentifier(re, v, spec, "FUNC NAME")
+					case *ast.SelectorExpr:
+						// a.PrintMyType()
+						newIdent = transformIdentifier(re, v, spec, "SELECTOR")
+					case *ast.StarExpr:
+						// *generic or *somethingGeneric
+						newIdent = transformType(re, v, spec, "STAR EXPR")
+					case *ast.CompositeLit:
+						if v == p.Type {
+							// myGen := generic{field1: 1, field2: 2}
+							newIdent = transformType(re, v, spec, "COMPOSITE LITERAL")
+						}
+					case *ast.MapType:
+						// var m map[generic]myvalue
+						// var m map[mykey]generic
+						newIdent = transformType(re, v, spec, "MAP TYPE")
+					case *ast.KeyValueExpr:
+						// MyStruct{ field: genericVal }
+						// MyStruct{ genericVal: field }
+						newIdent = transformType(re, v, spec, "KEY VALUE EXPR")
+					case *ast.BranchStmt:
+						// ignore
+					case *ast.File:
+						fmt.Println("UNRESOLVED???", v.Name, spec, reflect.TypeOf(c.Parent()))
+					default:
+						fmt.Println(">>>>>", v.Name, spec, reflect.TypeOf(c.Parent()))
+					}
+				}
+				if newIdent != nil {
+					c.Replace(newIdent)
+				}
+			case *ast.Comment:
+				// Replace the comments
+				newComment := *v
+				newComment.Text = transformText(re, v.Text, spec)
+				c.Replace(&newComment)
+			case *ast.TypeSpec:
+				if isGenericTypeDefinition(v) {
+					deleteAllComments(file, v)
+					c.Delete()
+				}
+			}
+			return true
+		},
+		func (c *astutil.Cursor) bool {
+			switch v := c.Node().(type) {
+			case *ast.GenDecl:
+				// If the declaration became empty after removing `type myType generic.Type`,
+				// remove the declaration as well
+				if len(v.Specs) == 0 {
+					deleteComment(file, v.Doc)
+					c.Delete()
+				}
+			}
+			return true
+		})
+}
+
+func isGenericTypeDefinition(typeSpec *ast.TypeSpec) bool {
+	switch t := typeSpec.Type.(type) {
+	case *ast.SelectorExpr:
+		return isGenericTypeSelector(t)
+	case *ast.InterfaceType:
+		for _, field := range t.Methods.List {
+			// TODO: need to check new specific type also implements the other methods in the
+			// interface?
+			if selector, ok := field.Type.(*ast.SelectorExpr); ok {
+				if isGenericTypeSelector(selector) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func isGenericTypeSelector(selector *ast.SelectorExpr) bool {
+	if ident, ok := selector.X.(*ast.Ident); ok {
+		if ident.Name == "generic" &&
+				(selector.Sel.Name == "Type" || selector.Sel.Name == "Number") {
+			return true
+		}
+	}
+	return false
+}
+
+func generateSpecificAst(filename string, in io.ReadSeeker, typeSet map[string]string) ([]byte, error) {
+
+	// ensure we are at the beginning of the file
+	in.Seek(0, os.SEEK_SET)
+
+	// parse the source file
+	fs := token.NewFileSet()
+	file, err := parser.ParseFile(fs, filename, in, parser.ParseComments)
+	if err != nil {
+		return nil, &errSource{Err: err}
+	}
+
+	// make sure every generic.Type is represented in the types
+	// argument.
+	for _, decl := range file.Decls {
+		switch it := decl.(type) {
+		case *ast.GenDecl:
+			for _, spec := range it.Specs {
+				ts, ok := spec.(*ast.TypeSpec)
+				if !ok {
+					continue
+				}
+				switch tt := ts.Type.(type) {
+				case *ast.SelectorExpr:
+					if name, ok := tt.X.(*ast.Ident); ok {
+						if name.Name == genericPackage {
+							if _, ok := typeSet[ts.Name.Name]; !ok {
+								return nil, &errMissingSpecificType{GenericType: ts.Name.Name}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	var buf bytes.Buffer
+	for t, specificType := range typeSet {
+		generateSpecificType(fs, file, replaceSpec{ t, specificType })
+	}
+
+	err = printer.Fprint(&buf, fs, file)
+	return buf.Bytes(), err
+}
+
+func containsFold(s, substring string) bool {
+	return strings.Contains(strings.ToLower(s), strings.ToLower(substring))
 }

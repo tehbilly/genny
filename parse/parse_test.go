@@ -23,6 +23,9 @@ var tests = []struct {
 	// expectations
 	expectedOut string
 	expectedErr error
+
+	suppressForAstImpl bool
+	suppressForLegacyImpl bool
 }{
 	{
 		filename:    "generic_queue.go",
@@ -87,6 +90,14 @@ var tests = []struct {
 		in:          `test/bugreports/generic_digraph.go`,
 		types:       []map[string]string{{"Node": "int"}},
 		expectedOut: `test/bugreports/int_digraph.go`,
+		suppressForLegacyImpl: true,
+	},
+	{
+		filename:    "generic_digraph.go",
+		in:          `test/bugreports/generic_digraph.go`,
+		types:       []map[string]string{{"Node": "int"}},
+		expectedOut: `test/bugreports/int_digraph_legacy.go.nobuild`,
+		suppressForAstImpl: true,
 	},
 	{
 		filename:    "renamed_pkg.go",
@@ -115,39 +126,59 @@ var tests = []struct {
 		expectedOut: `test/interfaces/join_expected.go`,
 		tag:         "",
 	},
+	{
+		filename:    "syntax.go",
+		in:          `test/syntax/syntax.go`,
+		types:       []map[string]string{{"myType": "specific"}},
+		expectedOut: `test/syntax/syntax_expected.go`,
+		tag:         "",
+		suppressForLegacyImpl: true,
+	},
 }
 
 func TestParse(t *testing.T) {
 
 	for testNo, test := range tests {
 
-		t.Run(fmt.Sprintf("%d:%s", testNo, test.expectedOut), func(t *testing.T) {
-			test.in = contents(test.in)
-			test.expectedOut = contents(test.expectedOut)
-
-			bytes, err := parse.Generics(test.filename, test.pkgName, strings.NewReader(test.in), test.types, test.imports, test.tag)
-
-			// check the error
-			if test.expectedErr == nil {
-				assert.NoError(t, err, "(%d: %s) No error was expected but got: %s", testNo, test.filename, err)
-			} else {
-				assert.NotNil(t, err, "(%d: %s) No error was returned by one was expected: %s", testNo, test.filename, test.expectedErr)
-				assert.IsType(t, test.expectedErr, err, "(%d: %s) Generate should return object of type %v", testNo, test.filename, test.expectedErr)
+		for _, useAst := range []bool { true, false } {
+			if (useAst && test.suppressForAstImpl) || (!useAst && test.suppressForLegacyImpl) {
+				continue
 			}
+			t.Run(fmt.Sprintf("%d:%s/(ast:%v)", testNo, test.expectedOut, useAst), func(t *testing.T) {
+				in := contents(test.in)
+				expectedOut := contents(test.expectedOut)
 
-			// assert the response
-			if !assert.Equal(t, test.expectedOut, string(bytes), "Parse didn't generate the expected output.") {
-				log.Println("EXPECTED: " + test.expectedOut)
-				log.Println("ACTUAL: " + string(bytes))
-			}
-		})
+				bytes, err := parse.Generics(
+					test.filename,
+					test.pkgName,
+					strings.NewReader(in),
+					test.types,
+					test.imports,
+					test.tag,
+					useAst)
+
+				// check the error
+				if test.expectedErr == nil {
+					assert.NoError(t, err, "(%d: %s) No error was expected but got: %s", testNo, test.filename, err)
+				} else {
+					assert.NotNil(t, err, "(%d: %s) No error was returned by one was expected: %s", testNo, test.filename, test.expectedErr)
+					assert.IsType(t, test.expectedErr, err, "(%d: %s) Generate should return object of type %v", testNo, test.filename, test.expectedErr)
+				}
+
+				// assert the response
+				if !assert.Equal(t, expectedOut, string(bytes), "Parse didn't generate the expected output.") {
+					log.Println("EXPECTED: " + expectedOut)
+					log.Println("ACTUAL: " + string(bytes))
+				}
+			})
+		}
 
 	}
 
 }
 
 func contents(s string) string {
-	if strings.HasSuffix(s, "go") {
+	if strings.HasSuffix(s, "go") || strings.HasSuffix(s, "go.nobuild") {
 		file, err := ioutil.ReadFile(s)
 		if err != nil {
 			panic(err)

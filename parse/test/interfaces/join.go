@@ -7,6 +7,7 @@ import (
 )
 
 type Stringer interface {
+	// Comments for generic.Type should be removed
 	generic.Type
 	fmt.Stringer
 }
