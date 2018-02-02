@@ -129,7 +129,10 @@ var tests = []struct {
 	{
 		filename:    "syntax.go",
 		in:          `test/syntax/syntax.go`,
-		types:       []map[string]string{{"myType": "specific"}},
+		types:       []map[string]string{
+			           {"myType": "timeSpan:time.Duration"},
+			           {"myType": "Fractional:float64"},
+			         },
 		expectedOut: `test/syntax/syntax_expected.go`,
 		tag:         "",
 		suppressForLegacyImpl: true,

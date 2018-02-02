@@ -317,13 +317,14 @@ func isAlphaNumeric(r rune) bool {
 // If s matches format `<Title>:<Type>` then <Title> is returned
 func wordify(s string, exported bool) string {
 	if sepIdx := strings.Index(s, ":"); sepIdx >= 0 {
-		return s[:sepIdx]
+		s = s[:sepIdx]
+	} else {
+		s = strings.TrimRight(s, "{}")
+		s = strings.TrimLeft(s, "*&")
+		s = strings.Replace(s, ".", "", -1)
 	}
-	s = strings.TrimRight(s, "{}")
-	s = strings.TrimLeft(s, "*&")
-	s = strings.Replace(s, ".", "", -1)
 	if !exported {
-		return s
+		return strings.ToLower(string(s[0])) + s[1:]
 	}
 	return strings.ToUpper(string(s[0])) + s[1:]
 }
@@ -466,9 +467,15 @@ func generateSpecificType(fs *token.FileSet, file *ast.File, spec replaceSpec) {
 							newIdent = transformIdentifier(re, v, spec, "VARNAME")
 						}
 					case *ast.CallExpr:
-						// myfunc(generic)
-						// myfunc(genericVariable)
-						newIdent = transformIdentifier(re, v, spec, "ARG VARNAME")
+						if v == p.Fun {
+							// generic(something), a.k.a. type conversion
+							// genericSomething(something)
+							newIdent = transformType(re, v, spec, "TYPE CONVERSION")
+						} else {
+							// myfunc(generic)
+							// myfunc(genericVariable)
+							newIdent = transformIdentifier(re, v, spec, "ARG VARNAME")
+						}
 					case *ast.TypeSpec:
 						if v == p.Name {
 							// type generic someType

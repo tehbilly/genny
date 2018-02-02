@@ -21,5 +21,5 @@ func _() {
 func PrintMyType(_myType myType) {
 	var _ MyTypeUppercase
 
-	println(myTypeVariable, _myType)
+	println(myTypeVariable, _myType, myType(123))
 }

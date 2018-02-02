@@ -4,21 +4,42 @@
 
 package syntax
 
-type specificList []specific
+import "time"
 
-type SpecificUppercase specific
+type timeSpanList []time.Duration
 
-var _ specific
-var specificVariable string
+type TimeSpanUppercase time.Duration
+
+var _ time.Duration
+var timeSpanVariable string
 
 func _() {
-	var _ []specific
-	var _ specificList
-	var _ []specificList
+	var _ []time.Duration
+	var _ timeSpanList
+	var _ []timeSpanList
 }
 
-func PrintSpecific(_specific specific) {
-	var _ SpecificUppercase
+func PrintTimeSpan(_timeSpan time.Duration) {
+	var _ TimeSpanUppercase
 
-	println(specificVariable, _specific)
+	println(timeSpanVariable, _timeSpan, time.Duration(123))
+}
+
+type fractionalList []float64
+
+type FractionalUppercase float64
+
+var _ float64
+var fractionalVariable string
+
+func _() {
+	var _ []float64
+	var _ fractionalList
+	var _ []fractionalList
+}
+
+func PrintFractional(_fractional float64) {
+	var _ FractionalUppercase
+
+	println(fractionalVariable, _fractional, float64(123))
 }
