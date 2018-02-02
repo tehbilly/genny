@@ -17,7 +17,7 @@ import (
 
 /*
 
-  source | genny gen [-in=""] [-out=""] [-pkg=""] "KeyType=string,int ValueType=string,int"
+  source | genny gen [-in=""] [-out=""] [-pkg=""] [--ast] "KeyType=string,int ValueType=string,int"
 
 */
 
@@ -55,7 +55,7 @@ func main() {
 		out     = flag.String("out", "", "file to save output to instead of stdout")
 		pkgName = flag.String("pkg", "", "package name for generated files")
 		genTag  = flag.String("tag", "", "build tag that is stripped from output")
-		useAst  = flag.Bool("ast", false, "use AST implementation")
+		useAst  = flag.Bool("ast", false, "whether to use AST implementation")
 		imports Strings
 		prefix  = "https://github.com/metabition/gennylib/raw/master/"
 	)
@@ -188,13 +188,14 @@ func gen(filename, pkgName string, in io.ReadSeeker, typesets []map[string]strin
 	return nil
 }
 
-// List of strings for flag
+// Strings is a list of strings for flag
 type Strings []string
 
 func (i Strings) String() string {
 	return strings.Join([]string(i), ", ")
 }
 
+// Set method to implement flag.Value
 func (i *Strings) Set(value string) error {
 	*i = append(*i, value)
 	return nil

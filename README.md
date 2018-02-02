@@ -66,6 +66,8 @@ Flags:
         package name for generated files
   -tag string
         bulid tag that is stripped from output
+  -ast bool
+        use AST based transformation (alternative implementation)
 ```
 
   * Comma separated type lists will generate code for each type
@@ -77,6 +79,7 @@ Flags:
   * `-out` - specify the output file (rather than using stdout)
   * `-pkg` - rename the package of the generated file (rather than use the package of the template)
   * `-tag` - if a `// +build` directive is encountered in the template matching this tag do not include it in the output
+  * `-ast` - use AST based transformation (alternative implementation)
 
 ### go generate
 
