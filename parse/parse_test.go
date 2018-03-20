@@ -24,7 +24,7 @@ var tests = []struct {
 	expectedOut string
 	expectedErr error
 
-	suppressForAstImpl bool
+	suppressForAstImpl    bool
 	suppressForLegacyImpl bool
 }{
 	{
@@ -86,17 +86,17 @@ var tests = []struct {
 		expectedOut: `test/numbers/int_number.go`,
 	},
 	{
-		filename:    "generic_digraph.go",
-		in:          `test/bugreports/generic_digraph.go`,
-		types:       []map[string]string{{"Node": "int"}},
-		expectedOut: `test/bugreports/int_digraph.go`,
+		filename:              "generic_digraph.go",
+		in:                    `test/bugreports/generic_digraph.go`,
+		types:                 []map[string]string{{"Node": "int"}},
+		expectedOut:           `test/bugreports/int_digraph.go`,
 		suppressForLegacyImpl: true,
 	},
 	{
-		filename:    "generic_digraph.go",
-		in:          `test/bugreports/generic_digraph.go`,
-		types:       []map[string]string{{"Node": "int"}},
-		expectedOut: `test/bugreports/int_digraph_legacy.go.nobuild`,
+		filename:           "generic_digraph.go",
+		in:                 `test/bugreports/generic_digraph.go`,
+		types:              []map[string]string{{"Node": "int"}},
+		expectedOut:        `test/bugreports/int_digraph_legacy.go.nobuild`,
 		suppressForAstImpl: true,
 	},
 	{
@@ -127,12 +127,12 @@ var tests = []struct {
 		tag:         "",
 	},
 	{
-		filename:    "syntax.go",
-		in:          `test/syntax/syntax.go`,
-		types:       []map[string]string{
-			           {"myType": "timeSpan:time.Duration"},
-			           {"myType": "Fractional:float64"},
-			         },
+		filename: "syntax.go",
+		in:       `test/syntax/syntax.go`,
+		types: []map[string]string{
+			{"myType": "timeSpan:time.Duration"},
+			{"myType": "Fractional:float64"},
+		},
 		expectedOut: `test/syntax/syntax_expected.go`,
 		tag:         "",
 		suppressForLegacyImpl: true,
@@ -143,7 +143,7 @@ func TestParse(t *testing.T) {
 
 	for testNo, test := range tests {
 
-		for _, useAst := range []bool { true, false } {
+		for _, useAst := range []bool{true, false} {
 			if (useAst && test.suppressForAstImpl) || (!useAst && test.suppressForLegacyImpl) {
 				continue
 			}
