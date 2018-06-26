@@ -13,7 +13,7 @@ var _ myType
 var myTypeVariable string
 
 func _() {
-	var _ []myType
+	var _ []myType  // A comment
 	var _ myTypeList
 	var _ []myTypeList
 }

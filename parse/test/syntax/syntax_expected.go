@@ -14,7 +14,7 @@ var _ time.Duration
 var timeSpanVariable string
 
 func _() {
-	var _ []time.Duration
+	var _ []time.Duration // A comment
 	var _ timeSpanList
 	var _ []timeSpanList
 }
@@ -33,7 +33,7 @@ var _ float64
 var fractionalVariable string
 
 func _() {
-	var _ []float64
+	var _ []float64 // A comment
 	var _ fractionalList
 	var _ []fractionalList
 }
