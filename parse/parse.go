@@ -126,7 +126,7 @@ func generateSpecific(filename string, in io.ReadSeeker, typeSet map[string]stri
 		for t, specificType := range typeSet {
 
 			// does the line contain our type
-			if strings.Contains(l, t) {
+			if containsFold(l, t) {
 
 				var newLine string
 				// check each word
@@ -134,17 +134,19 @@ func generateSpecific(filename string, in io.ReadSeeker, typeSet map[string]stri
 
 					i := 0
 					for {
-						i = strings.Index(word[i:], t) // find out where
+						typePos := i
+						i = indexFold(word[i:], t) // find out where
 
 						if i > -1 {
 
+							matchedType := word[typePos+i:typePos+i+len(t)]
 							// if this isn't an exact match
 							if i > 0 && isAlphaNumeric(rune(word[i-1])) || i < len(word)-len(t) && isAlphaNumeric(rune(word[i+len(t)])) {
-								// replace the word with a capitolized version
-								word = strings.Replace(word, t, wordify(specificType, unicode.IsUpper(rune(strings.TrimLeft(word, "*&")[0]))), 1)
+								// replace the word with a capitalized version
+								word = strings.Replace(word, matchedType, wordify(specificType, unicode.IsUpper(rune(strings.TrimLeft(word, "*&")[0]))), 1)
 							} else {
 								// replace the word as is
-								word = strings.Replace(word, t, typify(specificType), 1)
+								word = strings.Replace(word, matchedType, typify(specificType), 1)
 							}
 
 						} else {
@@ -635,4 +637,8 @@ func generateSpecificAst(filename string, in io.ReadSeeker, typeSet map[string]s
 
 func containsFold(s, substring string) bool {
 	return strings.Contains(strings.ToLower(s), strings.ToLower(substring))
+}
+
+func indexFold(s, substring string) int {
+	return strings.Index(strings.ToLower(s), strings.ToLower(substring))
 }

@@ -90,14 +90,6 @@ var tests = []struct {
 		in:          `test/bugreports/generic_digraph.go`,
 		types:       []map[string]string{{"Node": "int"}},
 		expectedOut: `test/bugreports/int_digraph.go`,
-		suppressForLegacyImpl: true,
-	},
-	{
-		filename:    "generic_digraph.go",
-		in:          `test/bugreports/generic_digraph.go`,
-		types:       []map[string]string{{"Node": "int"}},
-		expectedOut: `test/bugreports/int_digraph_legacy.go.nobuild`,
-		suppressForAstImpl: true,
 	},
 	{
 		filename:    "renamed_pkg.go",
