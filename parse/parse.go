@@ -100,13 +100,13 @@ func generateSpecific(filename string, in io.ReadSeeker, typeSet map[string]stri
 		l := scanner.Text()
 
 		if reInterfaceBegin.MatchString(l) {
-			interfaceLines = []string{l}
+			interfaceLines = []string{""}
 		}
 
 		if len(interfaceLines) > 0 && reInterfaceEnd.MatchString(l) {
 			if !interfaceContainsType {
-				for _, li := range append(interfaceLines, l) {
-					buf.WriteString(li)
+				for _, li := range append(interfaceLines, l)[1:] {
+					buf.WriteString(li + "\n")
 				}
 			}
 			interfaceLines, interfaceContainsType = nil, false
@@ -138,7 +138,7 @@ func generateSpecific(filename string, in io.ReadSeeker, typeSet map[string]stri
 
 						if i > -1 {
 
-							matchedType := word[typePos+i:typePos+i+len(t)]
+							matchedType := word[typePos+i : typePos+i+len(t)]
 							// if this isn't an exact match
 							if i > 0 && isAlphaNumeric(rune(word[i-1])) || i < len(word)-len(t) && isAlphaNumeric(rune(word[i+len(t)])) {
 								// replace the word with a capitalized version
@@ -390,7 +390,7 @@ func addImports(r io.Reader, importPaths []string) []byte {
 // ===== Start AST related implementation =====
 
 type replaceSpec struct {
-	genericType string
+	genericType  string
 	specificType string
 }
 
@@ -407,7 +407,7 @@ func (rs replaceSpec) String() string {
 }
 
 func deleteAllComments(file *ast.File, root ast.Node) {
-	ast.Inspect(root, func (n ast.Node) bool {
+	ast.Inspect(root, func(n ast.Node) bool {
 		if comment, ok := n.(*ast.CommentGroup); ok {
 			deleteComment(file, comment)
 		}
@@ -547,7 +547,7 @@ func generateSpecificType(fs *token.FileSet, file *ast.File, spec replaceSpec) {
 			}
 			return true
 		},
-		func (c *astutil.Cursor) bool {
+		func(c *astutil.Cursor) bool {
 			switch v := c.Node().(type) {
 			case *ast.GenDecl:
 				// If the declaration became empty after removing `type myType generic.Type`,
@@ -582,7 +582,7 @@ func isGenericTypeDefinition(typeSpec *ast.TypeSpec) bool {
 func isGenericTypeSelector(selector *ast.SelectorExpr) bool {
 	if ident, ok := selector.X.(*ast.Ident); ok {
 		if ident.Name == "generic" &&
-				(selector.Sel.Name == "Type" || selector.Sel.Name == "Number") {
+			(selector.Sel.Name == "Type" || selector.Sel.Name == "Number") {
 			return true
 		}
 	}
@@ -627,7 +627,7 @@ func generateSpecificAst(filename string, in io.ReadSeeker, typeSet map[string]s
 
 	var buf bytes.Buffer
 	for t, specificType := range typeSet {
-		generateSpecificType(fs, file, replaceSpec{ t, specificType })
+		generateSpecificType(fs, file, replaceSpec{t, specificType})
 	}
 
 	err = printer.Fprint(&buf, fs, file)
