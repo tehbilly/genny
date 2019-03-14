@@ -129,6 +129,15 @@ var tests = []struct {
 		tag:         "",
 		suppressForLegacyImpl: true,
 	},
+	{
+		filename:    "generic.go",
+		in:          `test/interface-template/generic.go`,
+		types:       []map[string]string{
+			           {"TypeParam": "string"},
+			         },
+		expectedOut: `test/interface-template/generic_expected.go`,
+		tag:         "",
+	},
 }
 
 func TestParse(t *testing.T) {
