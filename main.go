@@ -60,7 +60,7 @@ func main() {
 		imports Strings
 		prefix  = "https://github.com/metabition/gennylib/raw/master/"
 	)
-	flag.Var(&imports, "imp", "specify import explicitly (can be specified multiple times)")
+	flag.Var(&imports, "imp", "specify an import explicitly (can be specified multiple times)")
 	flag.Usage = usage
 	flag.Parse()
 	args := flag.Args()

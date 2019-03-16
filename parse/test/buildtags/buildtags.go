@@ -1,3 +1,6 @@
+// +build x,y z
+// +build genny
+
 package buildtags
 
 import (
@@ -5,9 +8,6 @@ import (
 
 	"github.com/mauricelam/genny/generic"
 )
-
-// +build x,y z
-// +build genny
 
 type _t_ generic.Type
 

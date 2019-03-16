@@ -112,6 +112,16 @@ var tests = []struct {
 		tag:         "",
 	},
 	{
+		filename:    "buildtags.go",
+		in:          `test/buildtags/buildtags.go`,
+		types:       []map[string]string{
+			{"_t_": "string"},
+			{"_t_": "int"},
+		},
+		expectedOut: `test/buildtags/buildtags_expected_multiple.go`,
+		tag:         "genny",
+	},
+	{
 		filename:    "join.go",
 		in:          `test/interfaces/join.go`,
 		types:       []map[string]string{{"Stringer": "MyStr"}},

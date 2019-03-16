@@ -4,7 +4,6 @@
 // see https://github.com/mauricelam/genny
 
 // +build x,y z
-// +build genny
 
 package buildtags
 
@@ -13,5 +12,9 @@ import (
 )
 
 func stringPrint(t string) {
+	fmt.Println(t)
+}
+
+func intPrint(t int) {
 	fmt.Println(t)
 }

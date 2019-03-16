@@ -3,13 +3,13 @@
 // Any changes will be lost if this file is regenerated.
 // see https://github.com/mauricelam/genny
 
+// +build x,y z
+
 package buildtags
 
 import (
 	"fmt"
 )
-
-// +build x,y z
 
 func intPrint(t int) {
 	fmt.Println(t)
