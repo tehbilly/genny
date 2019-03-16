@@ -1,7 +1,7 @@
 package syntax
 
 import (
-    "github.com/mauricelam/genny/generic"
+	"github.com/mauricelam/genny/generic"
 )
 
 type myType generic.Type
@@ -13,7 +13,7 @@ var _ myType
 var myTypeVariable string
 
 func _() {
-	var _ []myType  // A comment
+	var _ []myType // A comment
 	var _ myTypeList
 	var _ []myTypeList
 }

@@ -24,7 +24,7 @@ var tests = []struct {
 	expectedOut string
 	expectedErr error
 
-	suppressForAstImpl bool
+	suppressForAstImpl    bool
 	suppressForLegacyImpl bool
 }{
 	{
@@ -119,22 +119,22 @@ var tests = []struct {
 		tag:         "",
 	},
 	{
-		filename:    "syntax.go",
-		in:          `test/syntax/syntax.go`,
-		types:       []map[string]string{
-			           {"myType": "timeSpan:time.Duration"},
-			           {"myType": "Fractional:float64"},
-			         },
+		filename: "syntax.go",
+		in:       `test/syntax/syntax.go`,
+		types: []map[string]string{
+			{"myType": "timeSpan:time.Duration"},
+			{"myType": "Fractional:float64"},
+		},
 		expectedOut: `test/syntax/syntax_expected.go`,
 		tag:         "",
 		suppressForLegacyImpl: true,
 	},
 	{
-		filename:    "generic.go",
-		in:          `test/interface-template/generic.go`,
-		types:       []map[string]string{
-			           {"TypeParam": "string"},
-			         },
+		filename: "generic.go",
+		in:       `test/interface-template/generic.go`,
+		types: []map[string]string{
+			{"TypeParam": "string"},
+		},
 		expectedOut: `test/interface-template/generic_expected.go`,
 		tag:         "",
 	},
@@ -168,7 +168,7 @@ func TestParse(t *testing.T) {
 
 	for testNo, test := range tests {
 
-		for _, useAst := range []bool { true, false } {
+		for _, useAst := range []bool{true, false} {
 			if (useAst && test.suppressForAstImpl) || (!useAst && test.suppressForLegacyImpl) {
 				continue
 			}
