@@ -8,10 +8,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
+	// "path"
 	"runtime/debug"
 	"strings"
 
+	"github.com/mauricelam/genny/out"
 	"github.com/mauricelam/genny/parse"
 )
 
@@ -85,28 +86,7 @@ func main() {
 		return
 	}
 
-	var outWriter io.Writer
-	if len(*out) > 0 {
-		err := os.MkdirAll(path.Dir(*out), 0755)
-		if err != nil {
-			exitCode, mainErr = exitcodeDestFileFailed, err
-		}
-
-		outFile, err := os.Create(*out)
-		if err != nil {
-			exitCode, mainErr = exitcodeDestFileFailed, err
-			return
-		}
-		defer func(outPath string) {
-			outFile.Close()
-			if mainErr != nil {
-				os.RemoveAll(outPath)
-			}
-		}(*out)
-		outWriter = outFile
-	} else {
-		outWriter = os.Stdout
-	}
+	outWriter := newWriter(*out)
 
 	if strings.ToLower(args[0]) == "get" {
 		if len(args) != 3 {
@@ -171,6 +151,43 @@ Examples:
 
 Flags:`)
 	flag.PrintDefaults()
+}
+
+func newWriter(fileName string) io.Writer {
+	if fileName == "" {
+		return os.Stdout
+	}
+	lf := &out.LazyFile{FileName: fileName}
+	defer lf.Close()
+	return lf
+// <<<<<
+	// var outWriter io.Writer
+	// if len(*out) > 0 {
+	// 	err := os.MkdirAll(path.Dir(*out), 0755)
+	// 	if err != nil {
+	// 		exitCode, mainErr = exitcodeDestFileFailed, err
+	// 	}
+
+	// 	outFile, err := os.Create(*out)
+	// 	if err != nil {
+	// 		exitCode, mainErr = exitcodeDestFileFailed, err
+	// 		return
+	// 	}
+	// 	defer func(outPath string) {
+	// 		outFile.Close()
+	// 		if mainErr != nil {
+	// 			os.RemoveAll(outPath)
+	// 		}
+	// 	}(*out)
+	// 	outWriter = outFile
+	// } else {
+	// 	outWriter = os.Stdout
+	// }
+}
+
+func fatal(code int, a ...interface{}) {
+	fmt.Println(a...)
+	os.Exit(code)
 }
 
 // gen performs the generic generation.

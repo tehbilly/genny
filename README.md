@@ -17,7 +17,7 @@ go test github.com/mauricelam/genny/...
 
 =====
 
-**Forked from:** [cheekybits/genny](https://github.com/cheekybits/genny) (pron. Jenny) by Mat Ryer ([@matryer](https://twitter.com/matryer)) and Tyler Bunnell ([@TylerJBunnell](https://twitter.com/TylerJBunnell)).
+**Forked from:** [cheekybits/genny](https://github.com/mauricelam/genny) (pron. Jenny) by Mat Ryer ([@matryer](https://twitter.com/matryer)) and Tyler Bunnell ([@TylerJBunnell](https://twitter.com/TylerJBunnell)).
 
 Until the Go core team include support for [generics in Go](http://golang.org/doc/faq#generics), `genny` is a code-generation generics solution. It allows you write normal buildable and testable Go code which, when processed by the `genny gen` tool, will replace the generics with specific types.
 
