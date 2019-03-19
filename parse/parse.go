@@ -409,7 +409,6 @@ func changePackage(r io.Reader, pkgName string) []byte {
 	return out.Bytes()
 }
 
-// <<<<<<< HEAD
 func addImports(r io.Reader, importPaths []string) []byte {
 	var out bytes.Buffer
 	sc := bufio.NewScanner(r)
@@ -580,6 +579,9 @@ func generateSpecificType(fs *token.FileSet, file *ast.File, spec replaceSpec) {
 						// ignore
 					case *ast.File:
 						fmt.Println("UNRESOLVED???", v.Name, spec, reflect.TypeOf(c.Parent()))
+					case *ast.TypeAssertExpr:
+						// a.(generic)
+						newIdent = transformType(v, spec, "TYPE ASSERT EXPR")
 					default:
 						fmt.Println(">>>>>", v.Name, spec, reflect.TypeOf(c.Parent()))
 					}
