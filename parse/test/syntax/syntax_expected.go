@@ -21,10 +21,11 @@ func _() {
 }
 
 func PrintTimeSpan(_timeSpan time.Duration) {
-	var u TimeSpanUppercase
+	var _ TimeSpanUppercase
+	var u interface{}
 
-	println(timeSpanVariable, _timeSpan, time.Duration(123))
-	_ := u.(TimeSpanUppercase)
+	v := u.(TimeSpanUppercase)
+	println(timeSpanVariable, _timeSpan, time.Duration(123), v)
 }
 
 type fractionalList []float64
@@ -41,8 +42,9 @@ func _() {
 }
 
 func PrintFractional(_fractional float64) {
-	var u FractionalUppercase
+	var _ FractionalUppercase
+	var u interface{}
 
-	println(fractionalVariable, _fractional, float64(123))
-	_ := u.(FractionalUppercase)
+	v := u.(FractionalUppercase)
+	println(fractionalVariable, _fractional, float64(123), v)
 }

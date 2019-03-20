@@ -173,8 +173,8 @@ var tests = []struct {
 		expectedOut: `test/bugreports/negation_string.go`,
 	},
 	{
-		filename: "receiver_generic.go",
-		in:       `test/bugreports/receiver_generic.go`,
+		filename: "receiver_generic.go.nobuild",
+		in:       `test/bugreports/receiver_generic.go.nobuild`,
 		types: []map[string]string{
 			{"TA": "string", "TB": "int"},
 			{"TA": "string", "TB": "float64"},
