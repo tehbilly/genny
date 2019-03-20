@@ -260,14 +260,14 @@ func Generics(filename, pkgName string, in io.ReadSeeker, typeSets []map[string]
 	fileHasGennyStart := false
 	importLineIndex := -1
 	var collectedImports stringArraySet
-	cleanOutputLines := []string { header }
+	cleanOutputLines := []string{header}
 	for fileIndex, transformedOutput := range totalOutput {
 		insideImportBlock := false
 		packageFoundForFile := false
 		scanner := bufio.NewScanner(bytes.NewReader(transformedOutput))
 		pastGennyStart := false
 
-		FORSCAN:
+	FORSCAN:
 		for scanner.Scan() {
 
 			if bytes.HasPrefix(scanner.Bytes(), []byte("//genny:start")) {

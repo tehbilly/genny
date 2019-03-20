@@ -22,6 +22,6 @@ func PrintMyType(_myType myType) {
 	var _ MyTypeUppercase
 	var u interface{}
 
-    v := u.(MyTypeUppercase)
+	v := u.(MyTypeUppercase)
 	println(myTypeVariable, _myType, myType(123), v)
 }

@@ -112,9 +112,9 @@ var tests = []struct {
 		tag:         "",
 	},
 	{
-		filename:    "buildtags.go",
-		in:          `test/buildtags/buildtags.go`,
-		types:       []map[string]string{
+		filename: "buildtags.go",
+		in:       `test/buildtags/buildtags.go`,
+		types: []map[string]string{
 			{"_t_": "string"},
 			{"_t_": "int"},
 		},
@@ -135,8 +135,8 @@ var tests = []struct {
 			{"myType": "timeSpan:time.Duration"},
 			{"myType": "Fractional:float64"},
 		},
-		expectedOut: `test/syntax/syntax_expected.go`,
-		tag:         "",
+		expectedOut:           `test/syntax/syntax_expected.go`,
+		tag:                   "",
 		suppressForLegacyImpl: true,
 	},
 	{
