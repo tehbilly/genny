@@ -6,7 +6,7 @@ import "github.com/mauricelam/genny/generic"
 type X generic.Type
 
 // CellX is result of generating code via genny for type X
-// X - exact match of type name in comments uses the capitalization of the type
+// X X - exact match of type name in comments uses the capitalization of the type
 // xMen XMen - non exact match retains original capitalization
 type CellX struct {
 	Value X

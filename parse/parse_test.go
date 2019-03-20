@@ -172,10 +172,19 @@ var tests = []struct {
 		types:       []map[string]string{{"SomeThing": "string"}},
 		expectedOut: `test/bugreports/negation_string.go`,
 	},
+	{
+		filename: "receiver_generic.go",
+		in:       `test/bugreports/receiver_generic.go`,
+		types: []map[string]string{
+			{"TA": "string", "TB": "int"},
+			{"TA": "string", "TB": "float64"},
+			{"TA": "string", "TB": "bool"},
+		},
+		expectedOut: `test/bugreports/receiver_expected.go`,
+	},
 }
 
 func TestParse(t *testing.T) {
-
 	for testNo, test := range tests {
 
 		for _, useAst := range []bool{true, false} {

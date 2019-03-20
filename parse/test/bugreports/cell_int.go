@@ -6,7 +6,7 @@
 package bugreports
 
 // CellInt is result of generating code via genny for type int
-// int - exact match of type name in comments uses the capitalization of the type
+// int int - exact match of type name in comments uses the capitalization of the type
 // intMen IntMen - non exact match retains original capitalization
 type CellInt struct {
 	Value int
