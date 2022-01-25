@@ -282,7 +282,6 @@ func Generics(filename, pkgName string, in io.ReadSeeker, typeSets []map[string]
 					if err == nil {
 						for _, line := range buildLines {
 							if strings.Contains(line, stripTag) {
-								fmt.Printf("Skipping line that matches stripTag '%s': %s\n", stripTag, line)
 								continue FORSCAN
 							}
 						}
