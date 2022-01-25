@@ -5,18 +5,18 @@
 
 package queue
 
-// Float32Queue is a queue of Float32s.
-type Float32Queue struct {
-	items []float32
+// CrazyNumberQueue is a queue of CrazyNumbers.
+type CrazyNumberQueue struct {
+	items []int
 }
 
-func NewFloat32Queue() *Float32Queue {
-	return &Float32Queue{items: make([]float32, 0)}
+func NewCrazyNumberQueue() *CrazyNumberQueue {
+	return &CrazyNumberQueue{items: make([]int, 0)}
 }
-func (q *Float32Queue) Push(item float32) {
+func (q *CrazyNumberQueue) Push(item int) {
 	q.items = append(q.items, item)
 }
-func (q *Float32Queue) Pop() float32 {
+func (q *CrazyNumberQueue) Pop() int {
 	item := q.items[0]
 	q.items = q.items[1:]
 	return item

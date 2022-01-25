@@ -1,7 +1,7 @@
 package syntax
 
 import (
-	"github.com/mauricelam/genny/generic"
+	"github.com/tehbilly/genny/generic"
 )
 
 type myType generic.Type

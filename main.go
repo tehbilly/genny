@@ -12,8 +12,8 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/mauricelam/genny/out"
-	"github.com/mauricelam/genny/parse"
+	"github.com/tehbilly/genny/out"
+	"github.com/tehbilly/genny/parse"
 )
 
 /*
@@ -168,7 +168,7 @@ func fatal(code int, a ...interface{}) {
 }
 
 // gen performs the generic generation.
-func gen(filename, pkgName string, in io.ReadSeeker, typesets []map[string]string, imports []string, out io.Writer, tag string, useAst bool) error {
+func gen(filename, pkgName string, in io.ReadSeeker, typesets []map[string]parse.TypeRef, imports []string, out io.Writer, tag string, useAst bool) error {
 
 	var output []byte
 	var err error

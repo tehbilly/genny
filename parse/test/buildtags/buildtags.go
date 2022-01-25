@@ -1,3 +1,4 @@
+//go:build ((x && y) || z) && genny
 // +build x,y z
 // +build genny
 
@@ -6,7 +7,7 @@ package buildtags
 import (
 	"fmt"
 
-	"github.com/mauricelam/genny/generic"
+	"github.com/tehbilly/genny/generic"
 )
 
 type _t_ generic.Type

@@ -1,4 +1,4 @@
-module github.com/mauricelam/genny
+module github.com/tehbilly/genny
 
 go 1.12
 

@@ -3,49 +3,52 @@ package parse_test
 import (
 	"testing"
 
-	"github.com/mauricelam/genny/parse"
 	"github.com/stretchr/testify/assert"
+	"github.com/tehbilly/genny/parse"
 )
 
 func TestArgsToTypeset(t *testing.T) {
 
-	args := "Person=man,woman Animal=dog,cat Place=london,paris"
+	args := "Person=dude:man,woman Animal=pet:dog,cat Place=london,paris"
 	ts, err := parse.TypeSet(args)
 
 	if assert.NoError(t, err) {
 		if assert.Equal(t, 8, len(ts)) {
 
-			assert.Equal(t, ts[0]["Person"], "man")
-			assert.Equal(t, ts[0]["Animal"], "dog")
-			assert.Equal(t, ts[0]["Place"], "london")
+			assert.Equal(t, "dude", ts[0]["Person"].Alias)
+			assert.Equal(t, "man", ts[0]["Person"].Type)
+			assert.Equal(t, "pet", ts[0]["Animal"].Alias)
+			assert.Equal(t, "dog", ts[0]["Animal"].Type)
+			assert.Equal(t, "london", ts[0]["Place"].Alias)
+			assert.Equal(t, "london", ts[0]["Place"].Type)
 
-			assert.Equal(t, ts[1]["Person"], "man")
-			assert.Equal(t, ts[1]["Animal"], "dog")
-			assert.Equal(t, ts[1]["Place"], "paris")
+			assert.Equal(t, "man", ts[1]["Person"].Type)
+			assert.Equal(t, "dog", ts[1]["Animal"].Type)
+			assert.Equal(t, "paris", ts[1]["Place"].Type)
 
-			assert.Equal(t, ts[2]["Person"], "man")
-			assert.Equal(t, ts[2]["Animal"], "cat")
-			assert.Equal(t, ts[2]["Place"], "london")
+			assert.Equal(t, "man", ts[2]["Person"].Type)
+			assert.Equal(t, "cat", ts[2]["Animal"].Type)
+			assert.Equal(t, "london", ts[2]["Place"].Type)
 
-			assert.Equal(t, ts[3]["Person"], "man")
-			assert.Equal(t, ts[3]["Animal"], "cat")
-			assert.Equal(t, ts[3]["Place"], "paris")
+			assert.Equal(t, "man", ts[3]["Person"].Type)
+			assert.Equal(t, "cat", ts[3]["Animal"].Type)
+			assert.Equal(t, "paris", ts[3]["Place"].Type)
 
-			assert.Equal(t, ts[4]["Person"], "woman")
-			assert.Equal(t, ts[4]["Animal"], "dog")
-			assert.Equal(t, ts[4]["Place"], "london")
+			assert.Equal(t, "woman", ts[4]["Person"].Type)
+			assert.Equal(t, "dog", ts[4]["Animal"].Type)
+			assert.Equal(t, "london", ts[4]["Place"].Type)
 
-			assert.Equal(t, ts[5]["Person"], "woman")
-			assert.Equal(t, ts[5]["Animal"], "dog")
-			assert.Equal(t, ts[5]["Place"], "paris")
+			assert.Equal(t, "woman", ts[5]["Person"].Type)
+			assert.Equal(t, "dog", ts[5]["Animal"].Type)
+			assert.Equal(t, "paris", ts[5]["Place"].Type)
 
-			assert.Equal(t, ts[6]["Person"], "woman")
-			assert.Equal(t, ts[6]["Animal"], "cat")
-			assert.Equal(t, ts[6]["Place"], "london")
+			assert.Equal(t, "woman", ts[6]["Person"].Type)
+			assert.Equal(t, "cat", ts[6]["Animal"].Type)
+			assert.Equal(t, "london", ts[6]["Place"].Type)
 
-			assert.Equal(t, ts[7]["Person"], "woman")
-			assert.Equal(t, ts[7]["Animal"], "cat")
-			assert.Equal(t, ts[7]["Place"], "paris")
+			assert.Equal(t, "woman", ts[7]["Person"].Type)
+			assert.Equal(t, "cat", ts[7]["Animal"].Type)
+			assert.Equal(t, "paris", ts[7]["Place"].Type)
 
 		}
 	}
@@ -66,9 +69,9 @@ func TestArgsToTypeset(t *testing.T) {
 	ts, err = parse.TypeSet("Person=interface{} Animal=interface{} Place=interface{}")
 	if assert.NoError(t, err) {
 		assert.Equal(t, 1, len(ts))
-		assert.Equal(t, ts[0]["Animal"], "interface{}")
-		assert.Equal(t, ts[0]["Person"], "interface{}")
-		assert.Equal(t, ts[0]["Place"], "interface{}")
+		assert.Equal(t, ts[0]["Animal"].Type, "interface{}")
+		assert.Equal(t, ts[0]["Person"].Type, "interface{}")
+		assert.Equal(t, ts[0]["Place"].Type, "interface{}")
 	}
 
 }
